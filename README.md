@@ -16,29 +16,13 @@ A Flask-based API for secure request processing, featuring authentication, reque
 secure-request-processing-api/
 ├── app/
 │   ├── models/
-│   │   └── request.py
 │   ├── routes/
-│   │   ├── logs.py
-│   │   └── main.py
 │   ├── services/
-│   │   └── queue_service.py
 │   ├── utils/
-│   │   └── auth.py
 │   └── __init__.py
 ├── instance/
-│   └── main.db
 ├── logs/
-│   ├── app.log
-│   ├── app.log.1
-│   └── app.log.2
 ├── migrations/
-│   ├── versions/
-│   │   ├── 8088d79cdb17_initial_migration.py
-│   │   └── 7676022b80b0_request_query_field_changed_to_user_.py
-│   ├── alembic.ini
-│   ├── env.py
-│   ├── README
-│   └── script.py.mako
 ├── .env
 ├── config.py
 ├── requirements.txt
@@ -46,39 +30,38 @@ secure-request-processing-api/
 └── README.md
 ```
 
-## Installation
+## Installation and Setup
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/secure-request-processing-api.git
+   git clone https://github.com/ParsaZa79/secure-request-processing-api.git
    cd secure-request-processing-api
    ```
 
-2. Create a virtual environment and activate it:
+2. Set up a virtual environment and install dependencies:
    ```
    python -m venv venv
    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-   ```
-
-3. Install the required packages:
-   ```
    pip install -r requirements.txt
    ```
+
+3. Configure the environment:
+   - Create a `.env` file in the project root with the following variables:
+     ```
+     DATABASE_URL=sqlite:///yourdb.db
+     OAUTH_CLIENT_ID=your_oauth_client_id
+     OAUTH_CLIENT_SECRET=your_oauth_client_secret
+     RABBITMQ_HOST=rabbitmq
+     RABBITMQ_PORT=5672
+     RABBITMQ_USER=your_rabbitmq_user
+     RABBITMQ_PASS=your_rabbitmq_password
+     ```
+   - Adjust other configuration options in `config.py` as needed.
 
 4. Set up the database:
    ```
    flask db upgrade
    ```
-
-## Configuration
-
-1. Create a `.env` file in the project root and add the following variables:
-   ```
-   SECRET_KEY=your_secret_key
-   DATABASE_URI=sqlite:///instance/main.db
-   ```
-
-2. Adjust other configuration options in `config.py` as needed.
 
 ## Usage
 
@@ -90,28 +73,76 @@ python run.py
 
 The API will be available at `http://localhost:5000`.
 
+## Docker Deployment
+
+1. Ensure Docker and Docker Compose are installed.
+
+2. Build and start the containers:
+   ```
+   docker-compose up --build
+   ```
+
+3. To stop the containers:
+   ```
+   docker-compose down
+   ```
+
+Note: Ensure your `.env` file is properly configured before running Docker containers.
+
 ## API Endpoints
 
-- `POST /api/request`: Submit a new request
-- `GET /api/logs`: Retrieve logs (requires authentication)
+- `POST /submit-request`: Submit a new request (requires OAuth authentication)
+- `GET /fetch-requests`: Fetch the latest queued request (requires OAuth authentication)
+- `POST /submit-result`: Submit the result for a processed request (requires OAuth authentication)
+- `GET /get-result/<int:request_id>`: Get the result of a specific request (requires OAuth authentication)
+- `GET /logs`: Retrieve application logs (requires OAuth authentication)
+- `GET /logs/download`: Download application logs (requires OAuth authentication)
 
-For detailed API documentation, refer to the API specification document.
+For detailed API documentation, visit the `/apidocs` endpoint to access the Swagger UI.
 
 ## Authentication
 
-Authentication is handled using JWT (JSON Web Tokens). To access protected endpoints, include the JWT token in the Authorization header of your request:
+This API supports two authentication methods: JWT (JSON Web Tokens) and OAuth2 (Google).
+
+### JWT Authentication
+
+Use JWT for authentication by including the JWT token in the Authorization header:
 
 ```
 Authorization: Bearer <your_jwt_token>
 ```
 
-## Database
+JWT tokens can be obtained after successful authentication. They are stateless and contain encoded user information.
 
-The project uses SQLite as the database backend. The database file is located at `instance/main.db`.
+### OAuth2 Authentication
 
-## Logging
+OAuth2 authentication is implemented using Google's OAuth2 service. The authentication flow is as follows:
 
-Application logs are stored in the `logs/` directory. The logging system uses a rotating file handler to manage log files.
+1. The client initiates the OAuth2 flow by redirecting to Google's authentication page.
+2. After successful authentication, Google provides an access token.
+3. Include this access token in the Authorization header for subsequent requests:
+
+```
+Authorization: Bearer <your_oauth2_token>
+```
+
+### Authentication Flow
+
+1. The `oauth_required` decorator in `auth.py` checks for the presence of an Authorization header.
+2. It first attempts to validate the token as a JWT using `verify_jwt_in_request()`.
+3. If JWT validation fails, it then tries to validate the token as an OAuth2 token by making a request to Google's userinfo endpoint.
+4. If both validations fail, the request is denied with a 401 Unauthorized response.
+
+### Swagger Configuration
+
+The API documentation is configured with Swagger UI, supporting both JWT and OAuth2 authentication methods:
+
+- JWT is configured as a Bearer token in the `securityDefinitions`.
+- OAuth2 is set up with Google as the provider, including necessary URLs and scopes.
+
+Developers can test the API directly from the Swagger UI using either authentication method.
+
+To access the Swagger UI and detailed API documentation, visit the `/apidocs` endpoint.
 
 ## Project Architecture
 
