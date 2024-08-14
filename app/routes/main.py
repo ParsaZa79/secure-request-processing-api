@@ -8,22 +8,6 @@ from flask_dance.contrib.google import google
 
 bp = Blueprint('main', __name__)
 
-# @bp.route('/login')
-# def login():
-#     return redirect(url_for('google.login'))
-
-# @bp.route('/login/authorized')
-# def authorized():
-#     if not google.authorized:
-#         return redirect(url_for('google.login'))
-#     resp = google.get("/oauth2/v2/userinfo")
-#     assert resp.ok, resp.text
-#     email = resp.json()["email"]
-#     # Here you would typically create or update a user in your database
-#     # and then generate a JWT token for them
-#     token = generate_token(email)
-#     return jsonify({'token': token}), 200
-
 @bp.route('/submit-request', methods=['POST'])
 @oauth_required
 @swag_from({
@@ -166,9 +150,3 @@ def get_result(request_id):
         return jsonify({'result': req.result, 'status': req.status}), 200
     current_app.logger.warning(f"Attempt to get result for non-existent request ID: {request_id}")
     return jsonify({'message': 'Request not found'}), 404
-
-# @bp.route('/token', methods=['POST'])
-# def get_token():
-#     # This route is now deprecated as we're using OAuth2
-#     current_app.logger.warning("Deprecated /token route accessed")
-#     return jsonify({'message': 'This route is deprecated. Please use OAuth2 for authentication.'}), 410
