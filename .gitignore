@@ -199,6 +199,3 @@ instance/
 
 # Flask-Migrate
 migrations/
-
-# Application specific
-config.py
