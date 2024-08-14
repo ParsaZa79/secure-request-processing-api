@@ -91,13 +91,43 @@ Note: Ensure your `.env` file is properly configured before running Docker conta
 
 ## API Endpoints
 
-- `POST /submit-request`: Submit a new request (requires OAuth authentication)
-- `GET /fetch-requests`: Fetch the latest queued request (requires OAuth authentication)
-- `POST /submit-result`: Submit the result for a processed request (requires OAuth authentication)
-- `GET /get-result/<int:request_id>`: Get the result of a specific request (requires OAuth authentication)
-- `GET /logs`: Retrieve application logs (requires OAuth authentication)
-- `GET /logs/download`: Download application logs (requires OAuth authentication)
 
+### Request Management
+- `POST /submit-request`
+  - Description: Submit a new request for processing
+  - Authentication: Requires OAuth authentication
+  - Request Body: JSON object with `query` field (string)
+  - Response: JSON object with `request_id` (integer)
+
+- `GET /fetch-requests`
+  - Description: Fetch the latest queued request
+  - Authentication: Requires OAuth authentication
+  - Response: JSON object with `request_id` (integer) and `query` (string), or a 404 message if queue is empty
+
+- `POST /submit-result`
+  - Description: Submit the result for a processed request
+  - Authentication: Requires OAuth authentication
+  - Request Body: JSON object with `request_id` (integer) and `result` (string)
+  - Response: Success message or 404 if request not found
+
+- `GET /get-result/<int:request_id>`
+  - Description: Get the result of a specific request
+  - Authentication: Requires OAuth authentication
+  - Path Parameter: `request_id` (integer)
+  - Response: JSON object with `result` (string) and `status` (string), or 404 if not found
+
+### Log Management
+- `GET /logs`
+  - Description: Retrieve application logs
+  - Authentication: Requires OAuth authentication
+  - Response: JSON array of log entries
+
+- `GET /logs/download`
+  - Description: Download application logs as a file
+  - Authentication: Requires OAuth authentication
+  - Response: File download (app.log)
+
+All endpoints are secured with OAuth authentication. Detailed request/response schemas and error responses are documented in the Swagger UI, accessible via the `/apidocs` endpoint.
 For detailed API documentation, visit the `/apidocs` endpoint to access the Swagger UI.
 
 ## Authentication
