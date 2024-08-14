@@ -47,15 +47,6 @@ def oauth_required(f):
             return jsonify({"msg": "Invalid Authorization header"}), 401
 
         token = parts[1]
-
-        # First, try to validate as JWT
-        try:
-            verify_jwt_in_request()
-            return f(*args, **kwargs)
-        except Exception as e:
-            current_app.logger.info(f"JWT verification failed: {str(e)}")
-
-        # If JWT fails, try to validate as OAuth2 token
         try:
             headers = {'Authorization': f'Bearer {token}'}
             resp = requests.get('https://www.googleapis.com/oauth2/v3/userinfo', headers=headers)
