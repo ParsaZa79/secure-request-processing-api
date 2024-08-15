@@ -1,7 +1,6 @@
-from flask import jsonify, session, current_app, request
+from flask import jsonify, current_app, request
 from functools import wraps
-from flask_dance.contrib.google import make_google_blueprint, google
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
+from flask_dance.contrib.google import make_google_blueprint
 import requests
 
 def setup_oauth(app):
@@ -13,19 +12,6 @@ def setup_oauth(app):
     )
     app.register_blueprint(oauth_bp, url_prefix="/login")
     return oauth_bp
-
-def generate_token(user_id):
-    return create_access_token(identity=user_id)
-
-def auth_required(f):
-    @wraps(f)
-    @jwt_required()
-    def decorated(*args, **kwargs):
-        current_user = get_jwt_identity()
-        if not current_user:
-            return jsonify({"msg": "Missing or invalid token"}), 401
-        return f(*args, **kwargs)
-    return decorated
 
 def oauth_required(f):
     @wraps(f)
