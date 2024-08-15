@@ -1,4 +1,6 @@
 import os
+from datetime import timedelta
+
 
 class Config:
     # Base Configurations
@@ -8,6 +10,11 @@ class Config:
     # OAuth Configurations
     OAUTH_CLIENT_ID=os.getenv('OAUTH_CLIENT_ID')
     OAUTH_CLIENT_SECRET=os.getenv('OAUTH_CLIENT_SECRET')
+    
+    # SESSION-Related Configurations
+    SESSION_TYPE='filesystem'
+    SESSION_PERMANENT=True
+    PERMANENT_SESSION_LIFETIME=timedelta(minutes=5)
     
     # RabbitMQ Configurations
     RABBITMQ_HOST=os.getenv('RABBITMQ_HOST')
