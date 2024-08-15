@@ -154,5 +154,7 @@ def create_app(config_class=Config):
     
     from app.routes import auth
     app.register_blueprint(auth.bp)
+    
+    
 
     return app

@@ -7,7 +7,6 @@ from flasgger import swag_from
 bp = Blueprint('logs', __name__)
 
 @bp.route('/logs', methods=['GET'])
-@oauth_required
 @swag_from({
     'responses': {
         200: {
@@ -81,7 +80,6 @@ def get_logs():
         return jsonify({'error': 'Error reading log file'}), 500
 
 @bp.route('/logs/download', methods=['GET'])
-@oauth_required
 @swag_from({
     'parameters': [
         {

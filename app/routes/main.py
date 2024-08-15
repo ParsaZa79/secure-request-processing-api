@@ -6,6 +6,8 @@ from functools import wraps
 from flasgger import swag_from
 import requests
 
+from app.utils.auth import oauth_required
+
 bp = Blueprint('main', __name__)
 
 def session_required(f):
@@ -55,6 +57,7 @@ def exchange_token():
     return jsonify({"msg": "Session created successfully"}), 200
 
 @bp.route('/submit-request', methods=['POST'])
+@oauth_required
 @swag_from({
     'parameters': [
         {
@@ -95,6 +98,7 @@ def submit_request():
     return jsonify({'request_id': new_request.id}), 200
 
 @bp.route('/fetch-requests', methods=['GET'])
+@oauth_required
 @swag_from({
     'responses': {
         200: {
