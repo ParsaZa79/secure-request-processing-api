@@ -1,7 +1,7 @@
 import os
 import logging
-from logging.handlers import RotatingFileHandler
-from flask import Flask, jsonify
+from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -12,6 +12,9 @@ from flask_session import Session
 
 from config import Config
 from app.utils.auth import setup_oauth
+
+import json
+
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -66,6 +69,53 @@ swagger_config = {
     }
 }
 swagger = Swagger(template=swagger_template, config=swagger_config)
+
+
+def setup_logging(app):
+    class RequestFormatter(logging.Formatter):
+        def format(self, record):
+            record.url = request.url if request else "N/A"
+            record.remote_addr = request.remote_addr if request else "N/A"
+            return json.dumps({
+                'timestamp': self.formatTime(record, self.datefmt),
+                'level': record.levelname,
+                'message': record.getMessage(),
+                'url': record.url,
+                'remote_addr': record.remote_addr,
+                'module': record.module,
+                'funcName': record.funcName,
+                'lineno': record.lineno
+            })
+
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+
+    # Create handlers for different log levels
+    handlers = {
+        'error': TimedRotatingFileHandler('logs/error.log', when='midnight', backupCount=30),
+        'warning': TimedRotatingFileHandler('logs/warning.log', when='midnight', backupCount=30),
+        'info': TimedRotatingFileHandler('logs/info.log', when='midnight', backupCount=30),
+    }
+
+    for handler in handlers.values():
+        handler.setFormatter(RequestFormatter())
+
+    handlers['error'].setLevel(logging.ERROR)
+    handlers['warning'].setLevel(logging.WARNING)
+    handlers['info'].setLevel(logging.INFO)
+
+    # Remove existing handlers
+    for handler in app.logger.handlers[:]:
+        app.logger.removeHandler(handler)
+
+    # Add new handlers
+    for handler in handlers.values():
+        app.logger.addHandler(handler)
+
+    app.logger.setLevel(logging.INFO)
+
+
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -79,20 +129,10 @@ def create_app(config_class=Config):
     swagger.init_app(app)
 
     # Setup OAuth
-    oauth_provider = setup_oauth(app)
+    setup_oauth(app)
 
     # Set up logging
-    if not os.path.exists('logs'):
-        os.mkdir('logs')
-    file_handler = RotatingFileHandler('logs/app.log', maxBytes=10240, backupCount=10)
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-    ))
-    file_handler.setLevel(logging.INFO)
-    app.logger.addHandler(file_handler)
-
-    app.logger.setLevel(logging.INFO)
-    app.logger.info('Request Processing API startup')
+    setup_logging(app)
 
     # Register error handlers
     @app.errorhandler(404)
