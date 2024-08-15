@@ -18,6 +18,7 @@ EXPOSE 5000
 
 # Define environment variable
 ENV FLASK_APP=run.py
+ENV FLASK_ENV=production
 
-# Run app.py when the container launches
-CMD ["flask", "run", "--host=0.0.0.0"]
+# Run gunicorn when the container launches
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "run:app"]

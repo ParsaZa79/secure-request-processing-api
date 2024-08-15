@@ -6,11 +6,12 @@ services:
     ports:
       - "8080:5000"
     volumes:
-      - .:/app
+      - ./logs:/app/logs
     env_file:
       - .env
     depends_on:
       - rabbitmq
+    restart: always
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -20,8 +21,9 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     environment:
-      - RABBITMQ_DEFAULT_USER=user
-      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+    restart: always
 
 volumes:
   rabbitmq_data:
