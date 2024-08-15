@@ -8,6 +8,7 @@ from flask_jwt_extended import JWTManager
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
 from flasgger import Swagger
+from flask_session import Session
 
 from config import Config
 from app.utils.auth import setup_oauth
@@ -16,6 +17,8 @@ db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
 ma = Marshmallow()
+session = Session()
+
 
 swagger_template = {
     "swagger": "2.0",
@@ -25,27 +28,20 @@ swagger_template = {
         "version": "1.0.0"
     },
     "securityDefinitions": {
-        "Bearer": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
-        },
         "OAuth2": {
             "type": "oauth2",
             "flow": "implicit",
             "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
             "scopes": {
-                "email": "Access to user email",
-                "profile": "Access to user profile"
+                "email": "Access to user email"
             },
             "x-google-issuer": "https://accounts.google.com",
             "x-google-jwks_uri": "https://www.googleapis.com/oauth2/v3/certs",
-            "x-google-audiences": Config.OAUTH_CLIENT_ID  # Add this line
+            "x-google-audiences": Config.OAUTH_CLIENT_ID
         }
     },
     "security": [
-        {"Bearer": []},
-        {"OAuth2": ["email", "profile"]}
+        {"OAuth2": ["email"]}
     ]
 }
 
@@ -55,20 +51,20 @@ swagger_config = {
         {
             "endpoint": 'apispec',
             "route": '/apispec.json',
-            "rule_filter": lambda rule: True,  # all in
-            "model_filter": lambda tag: True,  # all in
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True,
         }
     ],
     "static_url_path": "/flasgger_static",
     "swagger_ui": True,
     "specs_route": "/apidocs/",
-    "oauth_config": {  # Add this section
+    "oauth_config": {
         "clientId": Config.OAUTH_CLIENT_ID,
-        "clientSecret": Config.OAUTH_CLIENT_SECRET,
-        "appName": "Your App Name"
+        "scopes": ["email"],
+        "appName": "Your App Name",
+        "usePkceWithAuthorizationCodeGrant": False
     }
 }
-
 swagger = Swagger(template=swagger_template, config=swagger_config)
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -78,6 +74,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     jwt.init_app(app)
     ma.init_app(app)
+    session.init_app(app)
     CORS(app)
     swagger.init_app(app)
 
@@ -114,5 +111,8 @@ def create_app(config_class=Config):
 
     from app.routes import logs
     app.register_blueprint(logs.bp)
+    
+    from app.routes import auth
+    app.register_blueprint(auth.bp)
 
     return app
