@@ -18,46 +18,8 @@ def session_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# @bp.route('/exchange-token', methods=['POST'])
-# def exchange_token():
-#     auth_code = request.json.get('code')
-#     if not auth_code:
-#         return jsonify({"msg": "Missing authorization code"}), 400
-
-#     # Exchange the auth code for tokens
-#     token_url = "https://oauth2.googleapis.com/token"
-#     data = {
-#         'code': auth_code,
-#         'client_id': current_app.config['OAUTH_CLIENT_ID'],
-#         'client_secret': current_app.config['OAUTH_CLIENT_SECRET'],
-#         'redirect_uri': 'http://localhost:5000/exchange-token',  # Must match the one used in your React app
-#         'grant_type': 'authorization_code'
-#     }
-#     response = requests.post(token_url, data=data)
-
-#     if response.status_code != 200:
-#         return jsonify({"msg": "Failed to exchange token"}), 400
-
-#     tokens = response.json()
-    
-#     # Use the access token to get user info
-#     user_info_response = requests.get('https://www.googleapis.com/oauth2/v3/userinfo', 
-#                                       headers={'Authorization': f"Bearer {tokens['access_token']}"})
-    
-#     if user_info_response.status_code != 200:
-#         return jsonify({"msg": "Failed to get user info"}), 400
-
-#     user_info = user_info_response.json()
-
-#     # Store user info and tokens in session
-#     session['user_id'] = user_info['sub']
-#     session['access_token'] = tokens['access_token']
-#     session['refresh_token'] = tokens.get('refresh_token')
-
-#     return jsonify({"msg": "Session created successfully"}), 200
-
 @bp.route('/submit-request', methods=['POST'])
-# @oauth_required
+@oauth_required
 @swag_from({
     'parameters': [
         {
@@ -98,7 +60,7 @@ def submit_request():
     return jsonify({'request_id': new_request.id}), 200
 
 @bp.route('/fetch-requests', methods=['GET'])
-# @oauth_required
+@oauth_required
 @swag_from({
     'responses': {
         200: {
@@ -122,6 +84,7 @@ def fetch_requests():
     return jsonify({'message': 'No requests in queue'}), 404
 
 @bp.route('/submit-result', methods=['POST'])
+@oauth_required
 @swag_from({
     'parameters': [
         {
@@ -166,6 +129,7 @@ def submit_result():
     return jsonify({'message': 'Request not found'}), 404
 
 @bp.route('/get-result/<int:request_id>', methods=['GET'])
+@oauth_required
 @swag_from({
     'parameters': [
         {
