@@ -11,7 +11,7 @@ from flasgger import Swagger
 from flask_session import Session
 
 from config import Config
-from app.utils.auth import setup_oauth
+
 
 import json
 
@@ -40,7 +40,7 @@ swagger_template = {
             },
             "x-google-issuer": "https://accounts.google.com",
             "x-google-jwks_uri": "https://www.googleapis.com/oauth2/v3/certs",
-            "x-google-audiences": Config.OAUTH_CLIENT_ID
+            "x-google-audiences": Config.GOOGLE_OAUTH_CLIENT_ID
         }
     },
     "security": [
@@ -62,7 +62,7 @@ swagger_config = {
     "swagger_ui": True,
     "specs_route": "/apidocs/",
     "oauth_config": {
-        "clientId": Config.OAUTH_CLIENT_ID,
+        "clientId": Config.GOOGLE_OAUTH_CLIENT_ID,
         "scopes": ["email"],
         "appName": "Your App Name",
         "usePkceWithAuthorizationCodeGrant": False
@@ -127,9 +127,6 @@ def create_app(config_class=Config):
     session.init_app(app)
     CORS(app)
     swagger.init_app(app)
-
-    # Setup OAuth
-    setup_oauth(app)
 
     # Set up logging
     setup_logging(app)
