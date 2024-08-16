@@ -1,22 +1,10 @@
 from datetime import datetime, timedelta, timezone
 from flask import Blueprint, jsonify, request, current_app, session
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import Flow
-from googleapiclient.discovery import build
 import jwt
-import os
 
 from app.models.user import User
 
 bp = Blueprint('auth', __name__)
-
-# Set up the OAuth 2.0 flow
-# flow = Flow.from_client_secrets_file(
-#             'client_secrets.json',
-#             scopes=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
-#         )
-# flow.redirect_uri = 'http://localhost:8080/api/auth/google'
 
 
 @bp.route('/api/auth/logout', methods=['POST'])
