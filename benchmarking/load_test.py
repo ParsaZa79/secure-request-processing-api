@@ -25,14 +25,14 @@ ENDPOINTS = [
     ("/get-result/1", "GET", None)
 ]
 
-def get_oauth_token():
+def get_session_token():
     # Return an OAuth token which you can copy from Swagger UI curl request after authorizing
-    return None
-    # return "ya29.a0AcM612w9UthLfzXCRsz6u7AbkaidCDwSjIUbliD7x04S5DfhZdcP6Pv4YtO11Ww1BOiaM6wDXez0QRb-O-A2t1AQMi0O0-KV42dk5FPJGMCL9OglyZ_CdWUZPLxE-r2h3Frbo4CPz8ktG6_akOL3fJZSpKu2qt-PYwaCgYKAUUSARASFQHGX2Mib3XDtJWkC5qla_4e01guiA0169"
+    # return None
+    # return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5YWM4YWIyLTEwNjQtNDJjMS05NTA3LTQyNWZhNTExOTQ0NSIsImVtYWlsIjoicHplaW5hbGkuZGV2QGdtYWlsLmNvbSIsIm5hbWUiOiJQYXJzYSBaZWluYWxpIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0p1M1M1OVlvWnYxLXAzZ25uWnU1Nml3ZU1Qalh1QUNSSWVTd1UwUmNsVzY1UDhhbUE9czk2LWMiLCJ1c2VybmFtZSI6bnVsbCwiZXhwIjoxNzIzOTE0MDYwfQ.tDam8yXy-g7DMv9MlTgyl6N0otgcsjom6kUhyJLcFug"
 
 def make_request(endpoint, method, data):
     url = f"{BASE_URL}{endpoint}"
-    headers = {"Authorization": f"Bearer {get_oauth_token()}"}
+    headers = {"Authorization": f"Bearer {get_session_token()}"}
     
     start_time = time.time()
     if method == "GET":
