@@ -12,11 +12,11 @@ from app.models.user import User
 bp = Blueprint('auth', __name__)
 
 # Set up the OAuth 2.0 flow
-flow = Flow.from_client_secrets_file(
-            'client_secrets.json',
-            scopes=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
-        )
-flow.redirect_uri = 'http://localhost:8080/api/auth/google'
+# flow = Flow.from_client_secrets_file(
+#             'client_secrets.json',
+#             scopes=['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
+#         )
+# flow.redirect_uri = 'http://localhost:8080/api/auth/google'
 
 
 @bp.route('/api/auth/logout', methods=['POST'])
@@ -27,25 +27,37 @@ def logout():
 @bp.route('/api/auth/google', methods=['POST'])
 def google_auth():
     try:
-        # Get the authorization code from the request
-        data = request.get_json()
-        code = data.get('code')
+        auth_code = request.json.get('code')
+        
+        current_app.logger.info(f"Auth code: {auth_code}")
+        
+        if not auth_code:
+            return jsonify({"msg": "Missing authorization code"}), 400
 
-        if not code:
-            return jsonify({"error": "Authorization code is required"}), 400
+        # Exchange the auth code for tokens
+        token_url = "https://oauth2.googleapis.com/token"
+        data = {
+            'code': auth_code,
+            'client_id': current_app.config['OAUTH_CLIENT_ID'],
+            'client_secret': current_app.config['OAUTH_CLIENT_SECRET'],
+            'redirect_uri': 'http://localhost:8080/api/auth/google',  # Must match the one used in your React app
+            'grant_type': 'authorization_code'
+        }
+        response = requests.post(token_url, data=data)
 
+        if response.status_code != 200:
+            return jsonify({"msg": "Failed to exchange token"}), 400
 
-        # Exchange the authorization code for tokens
-        flow.fetch_token(code=code)
+        tokens = response.json()
 
-        # Get the credentials
-        credentials = flow.credentials
+        # Use the access token to get user info
+        user_info_response = requests.get('https://www.googleapis.com/oauth2/v3/userinfo', 
+                                        headers={'Authorization': f"Bearer {tokens['access_token']}"})
 
-        # Use the credentials to build the OAuth2 service
-        oauth2_service = build('oauth2', 'v2', credentials=credentials)
+        if user_info_response.status_code != 200:
+            return jsonify({"msg": "Failed to get user info"}), 400
 
-        # Get user info
-        user_info = oauth2_service.userinfo().get().execute()
+        user_info = user_info_response.json()
 
         # Create a session token
         session_token = jwt.encode(
