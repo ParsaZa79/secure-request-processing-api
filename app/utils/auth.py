@@ -3,15 +3,15 @@ from functools import wraps
 from flask_dance.contrib.google import make_google_blueprint
 import requests
 
-def setup_oauth(app):
-    oauth_bp = make_google_blueprint(
-        client_id=app.config['OAUTH_CLIENT_ID'],
-        client_secret=app.config['OAUTH_CLIENT_SECRET'],
-        scope=["profile", "email"],
-        redirect_to="main.callback"  # Ensure you have a callback route defined
-    )
-    app.register_blueprint(oauth_bp, url_prefix="/login")
-    return oauth_bp
+# def setup_oauth(app):
+#     oauth_bp = make_google_blueprint(
+#         client_id=app.config['OAUTH_CLIENT_ID'],
+#         client_secret=app.config['OAUTH_CLIENT_SECRET'],
+#         scope=["profile", "email"],
+#         redirect_to="main.callback"  # Ensure you have a callback route defined
+#     )
+#     app.register_blueprint(oauth_bp, url_prefix="/login")
+#     return oauth_bp
 
 # def oauth_required(f):
 #     @wraps(f)
