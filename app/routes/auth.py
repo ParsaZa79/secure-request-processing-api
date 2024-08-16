@@ -29,9 +29,9 @@ def google_auth():
         token_url = "https://oauth2.googleapis.com/token"
         data = {
             'code': auth_code,
-            'client_id': current_app.config['OAUTH_CLIENT_ID'],
-            'client_secret': current_app.config['OAUTH_CLIENT_SECRET'],
-            'redirect_uri': 'http://localhost:8080/api/auth/google',  # Must match the one used in your React app
+            'client_id': current_app.config['GOOGLE_OAUTH_CLIENT_ID'],
+            'client_secret': current_app.config['GOOGLE_OAUTH_CLIENT_SECRET'],
+            'redirect_uri': 'http://localhost:3000/login',  # Must match the one used in your React app
             'grant_type': 'authorization_code'
         }
         response = requests.post(token_url, data=data)
@@ -50,33 +50,56 @@ def google_auth():
 
         user_info = user_info_response.json()
 
+        
+        # user = User.query.filter_by(google_id=user_info['sub']).first()
+        # if not user:
+        #     user = User(
+        #         google_id=user_info["sub"],
+        #         email=user_info['email'],
+        #         username=None,
+        #         name=user_info['name'],
+        #         picture=user_info.get('picture'),
+        #         session_token=session_token,
+        #         session_expiration=datetime.now(timezone.utc) + timedelta(hours=1)
+        #     )
+        #     db.session.add(user)
+        #     db.session.commit()
+            
+        # # Create a session token
+        
+        user = User.query.filter_by(google_id=user_info['sub']).first()
+        if not user:
+            user = User(
+                google_id=user_info['sub'],
+                username=None,
+                name=user_info.get('name'),
+                email=user_info.get('email'),
+                picture=user_info.get('picture'),
+                session_expiration=datetime.now(timezone.utc) + timedelta(days=1)
+            )
+            db.session.add(user)
+            db.session.commit()
+        
         # Create a session token
         session_token = jwt.encode(
             {
+                'id': str(user.id),
                 'email': user_info['email'],
                 'name': user_info['name'],
                 'picture': user_info.get('picture'),
+                'username': None,
+                'exp': int((datetime.now(timezone.utc) + timedelta(days=1)).timestamp())
             },
             current_app.config['JWT_SECRET_KEY'],
             algorithm='HS256'
         )
         
-        user = User.query.filter_by(email=user_info['email']).first()
-        if not user:
-            user = User(
-                email=user_info['email'],
-                name=user_info['name'],
-                picture=user_info.get('picture'),
-                session_token=session_token,
-                session_expiration=datetime.now(timezone.utc) + timedelta(hours=1)
-            )
-            user.save()
+        # Update the user with the session token
+        user.session_token = session_token
+        db.session.commit()
 
         return jsonify({
-            "session_token": session,
-            "email": user.email,
-            "name": user.name,
-            "picture": user.picture,
+            "session_token": session_token,
         }), 200
 
     except Exception as e:
@@ -129,20 +152,6 @@ def github_auth():
 
         user_info = user_info_response.json()
 
-        # Create a session token
-        session_token = jwt.encode(
-            {
-                'id': user_info['id'],
-                'username': user_info['login'],
-                'name': user_info.get('name'),
-                'email': user_info.get('email'),
-                'picture': user_info.get('avatar_url'),
-                'exp': datetime.now(timezone.utc) + timedelta(days=1)
-            },
-            current_app.config['JWT_SECRET_KEY'],
-            algorithm='HS256'
-        )
-        
         user = User.query.filter_by(github_id=user_info['id']).first()
         if not user:
             user = User(
@@ -151,23 +160,31 @@ def github_auth():
                 name=user_info.get('name'),
                 email=user_info.get('email'),
                 picture=user_info.get('avatar_url'),
-                session_token=session_token,
                 session_expiration=datetime.now(timezone.utc) + timedelta(days=1)
             )
             db.session.add(user)
             db.session.commit()
-        # else:
-        #     db.session.query(User).delete()
-        #     db.session.commit()
-
+        
+        # Create a session token
+        session_token = jwt.encode(
+            {
+                'id': str(user.id),
+                'username': user_info['login'],
+                'name': user_info.get('name'),
+                'email': user_info.get('email'),
+                'picture': user_info.get('avatar_url'),
+                'exp': int((datetime.now(timezone.utc) + timedelta(days=1)).timestamp())
+            },
+            current_app.config['JWT_SECRET_KEY'],
+            algorithm='HS256'
+        )
+        
+        # Update the user with the session token
+        user.session_token = session_token
+        db.session.commit()
+        
         return jsonify({
             "session_token": session_token,
-            "user": {
-                "username": user.username,
-                "name": user.name,
-                "email": user.email,
-                "picture": user.picture   
-            },
         }), 200
 
     except Exception as e:
