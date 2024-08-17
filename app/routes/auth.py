@@ -20,7 +20,7 @@ def google_auth():
     try:
         auth_code = request.json.get('code')
         
-        current_app.logger.info(f"Auth code: {auth_code}")
+        # current_app.logger.info(f"Auth code: {auth_code}")
         
         if not auth_code:
             return jsonify({"msg": "Missing authorization code"}), 400
@@ -98,7 +98,7 @@ def github_auth():
     try:
         auth_code = request.json.get('code')
         
-        current_app.logger.info(f"Auth code: {auth_code}")
+        # current_app.logger.info(f"Auth code: {auth_code}")
         
 
         token_exchange_url = 'https://github.com/login/oauth/access_token'
