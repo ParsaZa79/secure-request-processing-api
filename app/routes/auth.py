@@ -31,7 +31,7 @@ def google_auth():
             'code': auth_code,
             'client_id': current_app.config['GOOGLE_OAUTH_CLIENT_ID'],
             'client_secret': current_app.config['GOOGLE_OAUTH_CLIENT_SECRET'],
-            'redirect_uri': 'http://localhost:3000/login',  # Must match the one used in your React app
+            'redirect_uri': current_app.config['GOOGLE_OAUTH_REDIRECT_URI'],
             'grant_type': 'authorization_code'
         }
         response = requests.post(token_url, data=data)
@@ -51,22 +51,7 @@ def google_auth():
         user_info = user_info_response.json()
 
         
-        # user = User.query.filter_by(google_id=user_info['sub']).first()
-        # if not user:
-        #     user = User(
-        #         google_id=user_info["sub"],
-        #         email=user_info['email'],
-        #         username=None,
-        #         name=user_info['name'],
-        #         picture=user_info.get('picture'),
-        #         session_token=session_token,
-        #         session_expiration=datetime.now(timezone.utc) + timedelta(hours=1)
-        #     )
-        #     db.session.add(user)
-        #     db.session.commit()
-            
-        # # Create a session token
-        
+        # Create a session token
         user = User.query.filter_by(google_id=user_info['sub']).first()
         if not user:
             user = User(
@@ -125,7 +110,7 @@ def github_auth():
             'client_id': current_app.config['GITHUB_OAUTH_CLIENT_ID'],
             'client_secret': current_app.config['GITHUB_OAUTH_CLIENT_SECRET'],
             'code': auth_code,
-            'redirect_uri': 'http://localhost:3000/login',
+            'redirect_uri': current_app.config['GITHUB_OAUTH_REDIRECT_URI'],
         }
 
         response = requests.post(token_exchange_url, headers=token_exchange_headers, params=token_exchange_params)
