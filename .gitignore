@@ -199,3 +199,5 @@ instance/
 
 # Flask-Migrate
 migrations/
+
+client-secrets.json
