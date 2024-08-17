@@ -36,7 +36,6 @@ def oauth_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth_header = request.headers.get('Authorization')
-        current_app.logger.info(f"Authorization header: {auth_header}")
         
         if not auth_header:
             current_app.logger.error("No Authorization header present")
