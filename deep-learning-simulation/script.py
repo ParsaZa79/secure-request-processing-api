@@ -9,7 +9,7 @@ import jwt
 load_dotenv()
 
 # Configuration
-API_BASE_URL = "http://localhost:5000"  # Adjust this to your API's URL
+API_BASE_URL = "http://localhost:8080"  # Adjust this to your API's URL
 OAUTH_PROVIDER = "google"  # or "github"
 CLIENT_ID = os.getenv(f"{OAUTH_PROVIDER.upper()}_OAUTH_CLIENT_ID")
 CLIENT_SECRET = os.getenv(f"{OAUTH_PROVIDER.upper()}_OAUTH_CLIENT_SECRET")
@@ -43,12 +43,19 @@ def authenticate():
         return response.json()["session_token"]
     else:
         raise Exception(f"Authentication failed: {response.text}")
+    
+def get_session_code():
+    """
+    Use this method to get the session token without the need to authenticate.
+    """
+    return os.getenv("SESSION_TOKEN")
 
 def refresh_token_if_needed(session_token):
     """Check if the token is expired and refresh if necessary."""
     try:
         # Decode the token without verification to check expiration
         decoded = jwt.decode(session_token, options={"verify_signature": False})
+        print(decoded)
         exp = decoded.get('exp', 0)
         if exp < time.time():
             print("Token expired. Re-authenticating...")
@@ -91,7 +98,7 @@ def submit_result(session_token, request_id, result):
 
 def main():
     print("Deep Learning Server Simulation Started")
-    session_token = authenticate()
+    session_token = get_session_code()
     
     while True:
         session_token = refresh_token_if_needed(session_token)
