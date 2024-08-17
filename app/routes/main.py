@@ -193,7 +193,8 @@ def submit_result():
                 'type': 'object',
                 'properties': {
                     'result': {'type': 'string'},
-                    'status': {'type': 'string'}
+                    'status': {'type': 'string'},
+                    'request_id': {'type': 'integer'}
                 }
             }
         }
