@@ -200,4 +200,4 @@ instance/
 # Flask-Migrate
 migrations/
 
-client-secrets.json
+client_secrets.json
