@@ -1,7 +1,6 @@
 from app import db
 import uuid
 
-
 class User(db.Model):
     id = db.Column(db.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     github_id = db.Column(db.Integer, unique=True, nullable=True)
@@ -13,5 +12,7 @@ class User(db.Model):
     session_token = db.Column(db.String(500), nullable=True)
     session_expiration = db.Column(db.DateTime(timezone=True), nullable=False)
     
+    requests = db.relationship('Request', back_populates='user', lazy='dynamic')
+
     def __repr__(self):
         return f"<User {self.email}>"
