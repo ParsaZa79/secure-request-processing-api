@@ -26,9 +26,8 @@ ENDPOINTS = [
 ]
 
 def get_session_token():
-    # Return an OAuth token which you can copy from Swagger UI curl request after authorizing
-    # return None
-    # return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5YWM4YWIyLTEwNjQtNDJjMS05NTA3LTQyNWZhNTExOTQ0NSIsImVtYWlsIjoicHplaW5hbGkuZGV2QGdtYWlsLmNvbSIsIm5hbWUiOiJQYXJzYSBaZWluYWxpIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0p1M1M1OVlvWnYxLXAzZ25uWnU1Nml3ZU1Qalh1QUNSSWVTd1UwUmNsVzY1UDhhbUE9czk2LWMiLCJ1c2VybmFtZSI6bnVsbCwiZXhwIjoxNzIzOTE0MDYwfQ.tDam8yXy-g7DMv9MlTgyl6N0otgcsjom6kUhyJLcFug"
+    # You can return the session token retrieved from the auth flow of github or google
+    return "session_token"
 
 def make_request(endpoint, method, data):
     url = f"{BASE_URL}{endpoint}"
