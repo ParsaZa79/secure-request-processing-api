@@ -16,9 +16,15 @@ COPY . .
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
 
-# Define environment variable
+# Define environment variables
 ENV FLASK_APP=run.py
 ENV FLASK_ENV=production
 
-# Run gunicorn when the container launches
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "run:app"]
+# Create a shell script to run migrations and start the app
+RUN echo '#!/bin/sh\n\
+flask db upgrade\n\
+exec gunicorn --bind 0.0.0.0:5000 run:app\n'\
+> /app/start.sh && chmod +x /app/start.sh
+
+# Run the shell script when the container launches
+CMD ["/app/start.sh"]
