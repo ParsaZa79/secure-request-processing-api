@@ -130,6 +130,11 @@ def create_app(config_class=Config):
 
     # Set up logging
     setup_logging(app)
+    
+    # Configuring SSL
+    if app.config['SSL_CONTEXT']:
+        app.config['SESSION_COOKIE_SECURE'] = True
+        app.config['REMEMBER_COOKIE_SECURE'] = True
 
     # Register error handlers
     @app.errorhandler(404)
