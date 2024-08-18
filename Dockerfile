@@ -22,6 +22,10 @@ ENV FLASK_ENV=production
 
 # Create a shell script to run migrations and start the app
 RUN echo '#!/bin/sh\n\
+if [ ! -d "/app/instance" ] || [ ! "$(ls -A /app/instance/*.db 2>/dev/null)" ]; then\n\
+    flask db init\n\
+    flask db migrate\n\
+fi\n\
 flask db upgrade\n\
 exec gunicorn --bind 0.0.0.0:5000 run:app\n'\
 > /app/start.sh && chmod +x /app/start.sh
