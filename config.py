@@ -9,6 +9,10 @@ class Config:
     JWT_SECRET_KEY=os.getenv('JWT_SECRET_KEY')
     API_URL=os.getenv('API_URL')
     
+    # SSL Configurations
+    SSL_CONTEXT = ('cert.pem', 'key.pem') if os.environ.get('FLASK_ENV') == 'production' else None
+
+    
     # OAuth Configurations
     GOOGLE_OAUTH_CLIENT_ID=os.getenv('GOOGLE_OAUTH_CLIENT_ID')
     GOOGLE_OAUTH_CLIENT_SECRET=os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
