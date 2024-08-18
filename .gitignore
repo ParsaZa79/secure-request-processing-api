@@ -201,3 +201,5 @@ instance/
 migrations/
 
 client_secrets.json
+
+key.pem
